@@ -1,33 +1,82 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation} from "react-router-dom";
 
-export default function OutletForm() {
+export default function FoodOutletForm() {
+  const [name, setName] = useState("");
+  const [location, setLocation] = useState("");
   const navigate = useNavigate();
-  const [outlet, setOutlet] = useState("");
-  const [rating, setRating] = useState<number>(1);
-  const [review, setReview] = useState("");
+  const locationQuery = useLocation();
+  const isAdmin = new URLSearchParams(locationQuery.search).get("admin") === "yes";
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (!isAdmin) {
+      alert("You must be an admin to access this page.");
+      navigate("/not-authorized"); // Navigate to not-authorized page if not an admin
+    }
+  }, [isAdmin, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (Number(rating) < 1 || Number(rating) > 5) {
-      alert("Rating must be between 1 and 5.");
+
+    const token = localStorage.getItem("authToken"); // Get the token from localStorage
+
+    if (!token) {
+      alert("You must be logged in to add a food outlet.");
       return;
     }
-    console.log({ outlet, rating, review });
-    alert("Review added successfully!");
-    navigate("/home");
+
+    const foodOutletData = {
+      name,
+      location,
+    };
+
+    try {
+      const response = await fetch("https://localhost:7277/api/foodoutlet", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`, // Set the Authorization header
+        },
+        body: JSON.stringify(foodOutletData), // Send the data as JSON
+      });
+
+      if (response.ok) {
+        alert("Food outlet added successfully!");
+        navigate("/home"); // Redirect to home page after successful submission
+      } else {
+        const errorData = await response.json();
+        alert(`Error: ${errorData.message || "Something went wrong."}`);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+      alert("An error occurred. Please try again later.");
+    }
   };
 
   return (
-    <form className="auth-form" onSubmit={handleSubmit}>
-      <h2>Add Review</h2>
-      <label>Outlet:</label>
-      <input type="text" value={outlet} onChange={(e) => setOutlet(e.target.value)} required />
-      <label>Rating:</label>
-      <input type="number" min="1" max="5" value={rating} onChange={(e) => setRating(Number(e.target.value) || 1)} required />
-      <label>Review:</label>
-      <textarea value={review} onChange={(e) => setReview(e.target.value)} required />
-      <button type="submit">Submit Review</button>
+    <form onSubmit={handleSubmit} className="food-outlet-form">
+      <h2>Add a Food Outlet</h2>
+      <div>
+        <label htmlFor="name">Food Outlet Name:</label>
+        <input
+          type="text"
+          id="name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          required
+        />
+      </div>
+      <div>
+        <label htmlFor="location">Location:</label>
+        <input
+          type="text"
+          id="location"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          required
+        />
+      </div>
+      <button type="submit">Add Outlet</button>
     </form>
   );
 }

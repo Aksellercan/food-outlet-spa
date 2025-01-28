@@ -22,6 +22,7 @@ export default function LoginPage() {
       if (response.ok) {
         const data = await response.json();
         const token = data.token; // Assuming the API returns { "token": "..." }
+        localStorage.setItem("authToken", token); // Save the token in local storage
         //auth?.loginWithToken(token); // Save the token in your auth context or storage
         navigate("/home");
       } else {
