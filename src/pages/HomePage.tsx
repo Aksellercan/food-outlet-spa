@@ -16,7 +16,7 @@ export default function HomePage() {
   const navigate = useNavigate();
   const auth = useAuth();
   const isGuest = new URLSearchParams(location.search).get("guest") === "true";
-
+  const [searchTerm, setSearchTerm] = useState<string>(""); // State to store the search term
   const [foodOutlets, setFoodOutlets] = useState<FoodOutlet[]>([]);
   const [selectedSort, setSelectedSort] = useState<string>("normal");
 
@@ -42,13 +42,54 @@ export default function HomePage() {
     fetchFoodOutlets(selectedSort);
   }, [selectedSort]);
 
+  const handleAdmin = () => {
+    navigate("/outlet/add"); // Redirect to login page
+  };
+
+  // const handleLogin = () => {
+  //   localStorage.removeItem("authToken"); // Clear the token
+  //   navigate("/login"); // Redirect to login page
+  // };
+
+  const handleLogin = () => {
+    const authToken = localStorage.getItem("authToken");
+    if (authToken) {
+      // If token exists, log out the user
+      localStorage.removeItem("authToken");
+      navigate("/"); // Redirect to home page after logging out
+    } else {
+      // If token doesn't exist, redirect to login page
+      navigate("/login");
+    }
+  };
+
+  const filteredFoodOutlets = foodOutlets.filter((outlet) =>
+    outlet.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="home-container">
       <header className="header">
         <h1>Food Outlet Review Platform</h1>
+        <button onClick={handleAdmin}>Admin</button> 
+        {/* <button onClick={handleLogin}>Log in</button> Log Out button */}
+        <button onClick={handleLogin}>
+          {localStorage.getItem("authToken") ? "Log Out" : "Log in"}
+        </button> {/* Log In / Log Out button */}
       </header>
 
-      <div className="outlet-grid">
+      {/* Search filter */}
+      <div className="search-container">
+        <input
+          type="text"
+          placeholder="Search by outlet name..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)} // Update search term on change
+          className="search-input"
+        />
+      </div>
+
+      {/* <div className="outlet-grid">
         {foodOutlets.map((outlet) => (
           <a key={outlet.id} href={`/reviews/${outlet.id}`} className="outlet-card-link">
             <div className="outlet-card">
@@ -59,6 +100,23 @@ export default function HomePage() {
             </div>
           </a>
         ))}
+      </div> */}
+
+<div className="outlet-grid">
+        {filteredFoodOutlets.length === 0 ? (
+          <p>No outlets found</p> // If no outlets match search, show this message
+        ) : (
+          filteredFoodOutlets.map((outlet) => (
+            <a key={outlet.id} href={`/reviews/${outlet.id}`} className="outlet-card-link">
+              <div className="outlet-card">
+                <strong>{outlet.name}</strong>
+                <p>Location: {outlet.location}</p>
+                <p>Average Rating of {outlet.rating}</p>
+                <p>out of {outlet.reviewCount} Reviews</p>
+              </div>
+            </a>
+          ))
+        )}
       </div>
 
       <footer className="footer">

@@ -24,7 +24,7 @@ export default function LoginPage() {
         const token = data.token; // Assuming the API returns { "token": "..." }
         localStorage.setItem("authToken", token); // Save the token in local storage
         //auth?.loginWithToken(token); // Save the token in your auth context or storage
-        navigate("/home");
+        navigate("/");
       } else {
         alert("Invalid credentials. Please try again or register.");
       }
@@ -41,7 +41,7 @@ export default function LoginPage() {
       <input type="password" placeholder="Enter Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
       <button onClick={handleLogin} type="submit">Login</button>
       <button onClick={() => navigate("/register")} type="button">Register</button>
-      <button onClick={() => navigate("/home?guest=true")} type="button">Continue as Guest</button>
+      <button onClick={() => navigate("/?guest=true")} type="button">Continue as Guest</button>
     </form>
   );
 }

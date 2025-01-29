@@ -17,10 +17,10 @@ export default function VerifyAdmin() {
 
       if (response.ok) {
         // Admin verified, navigate to the actual outlet page
-        navigate("/outlet/add-form?admin=yes");
+        navigate("/outlet/list?admin=yes");
       } else {
         // Not authorized, show a message or navigate elsewhere
-        navigate("/not-authorized");
+        navigate("/");
       }
     };
 

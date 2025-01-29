@@ -4,12 +4,13 @@ import { useNavigate, useLocation} from "react-router-dom";
 export default function FoodOutletForm() {
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
+  const token = localStorage.getItem("authToken");
   const navigate = useNavigate();
   const locationQuery = useLocation();
   const isAdmin = new URLSearchParams(locationQuery.search).get("admin") === "yes";
 
   useEffect(() => {
-    if (!isAdmin) {
+    if (!isAdmin && !token) {
       alert("You must be an admin to access this page.");
       navigate("/not-authorized"); // Navigate to not-authorized page if not an admin
     }
@@ -42,7 +43,7 @@ export default function FoodOutletForm() {
 
       if (response.ok) {
         alert("Food outlet added successfully!");
-        navigate("/home"); // Redirect to home page after successful submission
+        navigate("/outlet/list"); // Redirect to home page after successful submission
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.message || "Something went wrong."}`);

@@ -26,10 +26,7 @@ export default function ReviewPage() {
   const [score, setScore] = useState<number>(1); // State for the score dropdown (1-5)
   const navigate = useNavigate(); // For navigation after logout
   const [loading, setLoading] = useState(false); // New loading state
-
-
   //const [jwtToken, setJwtToken] = useState<string>(""); // Assuming JWT token is set somewhere
-  
 
   // Fetch reviews on component mount or when id changes
   useEffect(() => {
@@ -89,7 +86,7 @@ export default function ReviewPage() {
       }
     } catch (error) {
       console.error("Error posting comment:", error);
-      alert("An error occurred. Please try again later.");
+      //alert("An error occurred. Please try again later.");
     }finally {
       setLoading(false); // Reset loading state after request completes
     }
@@ -97,14 +94,19 @@ export default function ReviewPage() {
 
   const handleLogout = () => {
     localStorage.removeItem("authToken"); // Clear the token
+    navigate("/login"); // Redirect to login page
+  };
+
+  const handleHomeNav = () => {
     navigate("/"); // Redirect to login page
   };
 
   return (
     <div className="review-container">
       <header className="header">
-        <h1>Reviews for Outlet {id}</h1>
-        <button onClick={handleLogout}>Log Out</button> {/* Log Out button */}
+        <h1>Reviews for Outlet id{id}</h1>
+        <button onClick={handleHomeNav}>Home</button>
+        <button onClick={handleLogout}>Log Out</button> 
       </header>
 
       <main className="main-content">

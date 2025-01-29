@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 interface Outlet {
   id: number;
@@ -12,13 +12,16 @@ interface Outlet {
 export default function ManageOutlets() {
   const [foodOutlets, setFoodOutlets] = useState<Outlet[]>([]);
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const isAdmin = queryParams.get("admin");
 
   // Fetch the list of food outlets
   useEffect(() => {
     const fetchOutlets = async () => {
       const token = localStorage.getItem("authToken");
 
-      if (!token) {
+      if (!token && isAdmin !== "yes") {
         alert("You must be logged in to manage food outlets.");
         navigate("/login"); // Redirect to login if not logged in
         return;
@@ -82,9 +85,32 @@ export default function ManageOutlets() {
     navigate(`/outlet/edit/${id}`); // Navigate to the edit page with the outlet id in the URL
   };
 
+  const handleAddOutlet = () => {
+    navigate("/outlet/add-form?admin=yes");
+  };
+
+  const handleLoginPage = () => {
+    localStorage.removeItem("authToken");
+    navigate("/login");
+  };
+
+  const handleHome = () => {
+    navigate("/");
+  }
+
   return (
-    <div>
-      <h2>Manage Food Outlets</h2>
+    <div className="page-container">
+      <header className="header">
+        <h2>Manage Food Outlets</h2>
+        <button className="home-button" onClick={handleHome}>
+          Home</button>
+        <button className="add-outlet-button" onClick={handleAddOutlet}>
+          Add Outlet
+        </button>
+        <button className="login-button" onClick={handleLoginPage}>
+          Log out
+          </button>
+      </header>
       {foodOutlets.length === 0 ? (
         <p>No food outlets available.</p>
       ) : (
@@ -110,6 +136,9 @@ export default function ManageOutlets() {
           </tbody>
         </table>
       )}
+       <footer className="footer">
+        <p>© 2025 Food Outlet Review Platform</p>
+      </footer>
     </div>
   );
 }
